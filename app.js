@@ -41,14 +41,14 @@
       btn.innerHTML=`<span class="weekday">${new Intl.DateTimeFormat('en',{weekday:'short'}).format(dt)}</span><span class="day-num">${dt.getDate()}</span>`;
       btn.addEventListener('click',()=>{selected=key;view='timeline';render();});$('weekStrip').append(btn);
     }
-    $('timelineTab').classList.toggle('active',view==='timeline');$('upcomingTab').classList.toggle('active',view==='upcoming');
-    const display=view==='timeline'?plans.filter(x=>x.plan_date===selected):plans.filter(x=>x.plan_date>=today()&&x.plan_date<=shiftDay(today(),14));
+    $('timelineTab').classList.toggle('active',view==='timeline');$('upcomingTab').classList.toggle('active',view==='upcoming');$('bulletinsTab').classList.toggle('active',view==='bulletins');
+    const display=view==='timeline'?plans.filter(x=>x.plan_date===selected):view==='upcoming'?plans.filter(x=>x.plan_date>=today()&&x.plan_date<=shiftDay(today(),14)):[];
     $('daySummary').textContent=view==='timeline'?`${display.filter(p=>p.done).length} of ${display.length} completed`:'Next 14 days';
-    $('dateTitle').textContent=view==='upcoming'?'Upcoming':$('dateTitle').textContent;
-    $('weekStrip').hidden=view==='upcoming';$('todayBtn').hidden=view==='upcoming'||selected===today();
+    $('dateTitle').textContent=view==='upcoming'?'Tuvākie':view==='bulletins'?'Biļetenes':$('dateTitle').textContent;
+    $('weekStrip').hidden=view!=='timeline';$('todayBtn').hidden=view!=='timeline'||selected===today();
     $('emptyState').hidden=display.length!==0;
-    $('emptyState').textContent=view==='timeline'?'No plans for this day. Tap + to add one.':'Nothing scheduled in the next 14 days.';
-    if(view==='timeline')renderTimeline(display);else renderUpcoming(display);
+    $('emptyState').textContent=view==='timeline'?'Šai dienai vēl nav plānu. Spied +, lai pievienotu.':'Nākamajās 14 dienās nav plānu.';
+    if(view==='timeline')renderTimeline(display);else if(view==='upcoming')renderUpcoming(display);else renderBulletins();
     $('accountBtn').textContent=user?'Synced':'Account';
   }
   function renderTimeline(items){
@@ -72,6 +72,9 @@
     }
     if(selected===today()){const n=minuteNow();if(n>=start&&n<=end){const line=document.createElement('div');line.className='now-line';line.style.top=`${(n-start)*1.2}px`;wrap.append(line);}}
   }
+  function renderBulletins(){const wrap=$('timeline');wrap.innerHTML='';wrap.className='bulletins-view';$('emptyState').hidden=true;
+    wrap.innerHTML='<section class="bulletin-head"><h2>Biļetenes sarakste</h2></section><div class="person-card"><span class="avatar">D</span><strong>Dalībnieks</strong></div><div class="edit-ghost"><b>Pasākuma laiks</b><span>Gaida rediģēšanas apstiprinājumu</span></div><article class="bulletin-card"><span class="avatar small">A</span><h3>Laika maiņas pieprasījums</h3><p>Lūdzu, apstiprini izmaiņas pasākuma sākuma laikā.</p><div class="decision-row"><button class="decline" type="button" aria-label="Noraidīt">✕</button><button class="accept" type="button" aria-label="Pieņemt">✓</button></div></article><p class="chat-message">Pieliku arī piezīmi pie pasākuma.</p><form class="chat-compose"><span class="material-symbols-outlined">attach_file</span><input aria-label="Rakstīt ziņu" placeholder="Rakstiet..."><button type="submit" aria-label="Nosūtīt"><span class="material-symbols-outlined">send</span></button></form>';
+    wrap.querySelector('.accept').addEventListener('click',()=>message('Biļetene pieņemta'));wrap.querySelector('.decline').addEventListener('click',()=>message('Biļetene noraidīta'));wrap.querySelector('form').addEventListener('submit',e=>{e.preventDefault();const input=e.currentTarget.querySelector('input');if(input.value.trim()){message('Ziņa nosūtīta');input.value='';}});}
   function renderUpcoming(items){const wrap=$('timeline');wrap.innerHTML='';wrap.className='timeline upcoming-list';
     if(!items.length)return;
     const sorted=[...items].sort((a,b)=>a.plan_date.localeCompare(b.plan_date)||a.start_time.localeCompare(b.start_time));let previous='';
@@ -99,6 +102,7 @@
   $('todayBtn').addEventListener('click',()=>{selected=today();view='timeline';render();});
   $('timelineTab').addEventListener('click',()=>{view='timeline';render();});
   $('upcomingTab').addEventListener('click',()=>{view='upcoming';render();});
+  $('bulletinsTab').addEventListener('click',()=>{view='bulletins';render();});
   $('accountBtn').addEventListener('click',showAccount);
   $('closeAccount').addEventListener('click',()=>$('accountDialog').close());
   function showAccount(){const wrap=$('accountContent');wrap.replaceChildren();
