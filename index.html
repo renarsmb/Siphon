@@ -1,41 +1,36 @@
 <!doctype html>
-<html lang="lv">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#ffffff">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <title>Dayline — Timeline Planner</title>
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0&display=swap">
-  <link rel="stylesheet" href="styles.css">
-  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script defer src="config.js"></script>
-  <script defer src="app.js"></script>
-</head>
-<body>
-  <div id="app" class="app">
-    <header class="header">
-      <div class="header-top"><div class="brand">dayline<span class="brand-dot">.</span></div><button id="accountBtn" class="text-button" type="button">Account</button></div>
-      <div class="date-top"><div><p id="weekLabel" class="eyebrow"></p><h1 id="dateTitle">Today</h1></div><button id="todayBtn" class="today-button" type="button">Today</button></div>
-      <nav id="weekStrip" class="week-strip" aria-label="Choose day"></nav>
-      <div class="toolbar"><div id="daySummary" class="day-summary" aria-live="polite"></div><button id="addTop" class="add-small" type="button"><span aria-hidden="true">＋</span> Add</button></div>
-    </header>
-
-    <main id="schedule" class="schedule" aria-label="Daily timeline">
-      <div id="timeline" class="timeline"></div>
-      <div id="emptyState" class="empty-state" hidden>No plans for this day. Tap + to add one.</div>
-    </main>
-    <button id="addFab" class="fab" type="button" aria-label="Add plan">＋</button>
-    <nav class="bottom-nav" aria-label="Galvenā navigācija"><button class="nav-item active" type="button" id="timelineTab"><span class="material-symbols-outlined">view_timeline</span><span>Laika josla</span></button><button class="nav-item" type="button" id="upcomingTab"><span class="material-symbols-outlined">calendar_month</span><span>Tuvākie</span></button><button class="nav-item" type="button" id="bulletinsTab"><span class="material-symbols-outlined">inbox</span><span>Biļetenes</span></button></nav>
-  </div>
-
-  <dialog id="taskDialog" class="sheet"><form id="taskForm" method="dialog" novalidate><div class="sheet-head"><h2 id="sheetTitle">New plan</h2><button class="icon-button" type="button" id="closeSheet" aria-label="Close">×</button></div><label for="taskTitle">Title</label><input id="taskTitle" name="title" type="text" maxlength="120" autocomplete="off" required placeholder="What are you planning?"><label for="taskNotes">Notes <span class="muted">(optional)</span></label><textarea id="taskNotes" rows="2" maxlength="2000" placeholder="Details"></textarea><div class="two-col"><div><label for="taskDate">Date</label><input id="taskDate" type="date" required></div><div><label for="taskCategory">Category</label><select id="taskCategory"><option value="personal">Personal</option><option value="school">School</option><option value="work">Work</option><option value="health">Health</option></select></div></div><div class="two-col"><div><label for="taskStart">Start</label><input id="taskStart" type="time" required></div><div><label for="taskEnd">End</label><input id="taskEnd" type="time" required></div></div><label class="checkbox-label"><input id="taskDone" type="checkbox"> Completed</label><p id="formError" class="error" role="alert"></p><div class="form-actions"><button id="deleteTask" class="delete-button" type="button" hidden>Delete</button><button id="saveTask" class="primary-button" type="submit">Save plan</button></div></form></dialog>
-
-  <dialog id="accountDialog" class="sheet"><div class="sheet-head"><h2>Account & sync</h2><button id="closeAccount" class="icon-button" type="button" aria-label="Close">×</button></div><div id="accountContent"></div></dialog>
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script>if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));</script>
-</body>
-</html>
+<html lang="lv"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes"><title>Dayline — Plānotājs</title>
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0&display=swap"><link rel="stylesheet" href="styles.css">
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script defer src="config.js"></script><script defer src="timeline.js"></script><script defer src="app.js"></script>
+</head><body>
+<div id="app" class="app">
+<header class="header">
+ <div class="header-top"><div class="brand">dayline<span class="brand-dot">.</span></div><div class="header-actions"><select id="workspace" aria-label="Darba telpa"><option value="">Personīgi</option></select><button id="accountBtn" class="text-button">Konts</button></div></div>
+ <p id="connectionStatus" class="connection-status" role="status"></p>
+ <div id="calendarHeader"><div class="week-controls"><button id="prevWeek" class="week-arrow" aria-label="Iepriekšējā nedēļa"><span class="material-symbols-outlined" aria-hidden="true">chevron_left</span></button><span id="rangeLabel"></span><button id="nextWeek" class="week-arrow" aria-label="Nākamā nedēļa"><span class="material-symbols-outlined" aria-hidden="true">chevron_right</span></button><label class="calendar-picker"><span class="material-symbols-outlined" aria-hidden="true">calendar_month</span><input id="jumpDate" type="date" aria-label="Izvēlēties datumu"></label><button id="todayBtn" class="today-button">Šodien</button></div><div class="week-clip"><nav id="weekStrip" class="week-strip" aria-label="Izvēlēties dienu"></nav></div></div>
+ <div class="toolbar"><div id="daySummary" class="day-summary" aria-live="polite"></div><button id="addTop" class="add-small"><span class="material-symbols-outlined" aria-hidden="true">add</span>Pievienot</button></div>
+</header>
+<main id="schedule" class="schedule" aria-label="Plānotājs"><div id="timeline" class="timeline"></div><div id="emptyState" class="empty-state" hidden>Nav plānu. Pievieno jaunu ar +.</div></main>
+<section id="draftBar" class="draft-bar" hidden aria-label="Nesaglabātās izmaiņas"><span>Nesaglabātas izmaiņas</span><div><button id="discardDraft" class="secondary-button">Atcelt</button><button id="editDraft" class="secondary-button">Rediģēt</button><button id="commitDraft" class="primary-button">Saglabāt</button></div><p id="draftError" class="error" role="alert"></p></section>
+<button id="addFab" class="fab" aria-label="Pievienot plānu">＋</button>
+<nav class="bottom-nav" aria-label="Galvenā navigācija"><button class="nav-item active" id="timelineTab"><span class="material-symbols-outlined" aria-hidden="true">view_timeline</span><span>Laika josla</span></button><button class="nav-item" id="upcomingTab"><span class="material-symbols-outlined" aria-hidden="true">calendar_month</span><span>Tuvākie</span></button><button class="nav-item" id="bulletinsTab"><span class="material-symbols-outlined" aria-hidden="true">inbox</span><span>Biļetenes</span></button><button class="nav-item" id="settingsTab"><span class="material-symbols-outlined" aria-hidden="true">settings</span><span>Iestatījumi</span></button></nav>
+</div>
+<dialog id="taskDialog" class="sheet"><form id="taskForm" novalidate><div class="sheet-head"><h2 id="sheetTitle">Jauns plāns</h2><button class="icon-button" type="button" id="closeSheet" aria-label="Aizvērt">×</button></div>
+<label for="taskTitle">Nosaukums</label><input id="taskTitle" maxlength="120" required autocomplete="off">
+<label for="taskNotes">Piezīmes</label><textarea id="taskNotes" rows="2" maxlength="2000"></textarea>
+<div class="two-col"><div><label for="taskDate">Sākuma datums</label><input id="taskDate" type="date" required></div><div><label for="taskEndDate">Beigu datums</label><input id="taskEndDate" type="date" required></div></div>
+<div class="two-col"><div><label for="taskStart">Sākums</label><input id="taskStart" type="time" required></div><div><label for="taskEnd">Beigas</label><input id="taskEnd" type="time" required></div></div>
+<div class="two-col"><div><label for="taskPriority">Prioritāte</label><select id="taskPriority"><option value="1">V1 — augstākā</option><option value="2">V2</option><option value="3">V3</option><option value="4">V4 — zemākā</option></select></div><div><label for="taskColor">Bloka krāsa</label><input id="taskColor" type="color" value="#d3656b"></div></div>
+<div class="two-col"><div><label for="taskCategory">Kategorija</label><select id="taskCategory"><option value="personal">Personīgi</option><option value="school">Skola</option><option value="work">Darbs</option><option value="health">Veselība</option></select></div><div><label for="taskStatus">Statuss</label><select id="taskStatus"><option value="scheduled">Ieplānots</option><option value="postponed">Atlikts</option></select></div></div>
+<label for="taskParticipants">Dalībnieku nosaukumi</label><input id="taskParticipants" maxlength="200"><fieldset id="assigneesField" hidden><legend>Piešķirt piekļuvi dalībniekiem</legend><div id="assigneesList"></div></fieldset>
+<label class="checkbox-label"><input id="taskImportant" type="checkbox">Svarīgs pasākums</label><label class="checkbox-label"><input id="taskDone" type="checkbox">Pabeigts</label>
+<p id="formError" class="error" role="alert"></p><div class="form-actions"><button id="deleteTask" class="delete-button" type="button" hidden>Dzēst</button><button id="requestApproval" class="secondary-button" type="button" hidden>Iesniegt apstiprināšanai</button><button id="saveTask" class="primary-button" type="submit">Saglabāt plānu</button></div></form></dialog>
+<dialog id="moveDialog" class="sheet"><div class="sheet-head"><h2>Pārvietot plānu</h2><button id="closeMove" class="icon-button" aria-label="Atcelt pārvietošanu">×</button></div><p id="moveDescription" class="account-copy"></p><div class="move-options"><button id="keepTime" class="secondary-button">Paturēt to pašu laiku</button><button id="nearestTime" class="secondary-button">Tuvākais brīvais laiks</button><button id="customTime" class="secondary-button">Izvēlēties citu laiku</button></div><p id="moveError" class="error" role="alert"></p></dialog>
+<dialog id="accountDialog" class="sheet"><div class="sheet-head"><h2>Konts</h2><button id="closeAccount" class="icon-button" aria-label="Aizvērt">×</button></div><div id="accountContent"></div></dialog>
+<dialog id="bulletinDialog" class="sheet"><form id="bulletinForm"><div class="sheet-head"><h2>Jauna biļetene</h2><button id="closeBulletin" class="icon-button" type="button" aria-label="Aizvērt">×</button></div><label for="bulletinRecipient">Saņēmējs</label><select id="bulletinRecipient" required></select><label for="bulletinPlan">Piesaistītais plāns</label><select id="bulletinPlan"></select><label for="bulletinSubject">Virsraksts</label><input id="bulletinSubject" maxlength="120" required><label for="bulletinBody">Apraksts</label><textarea id="bulletinBody" maxlength="4000" rows="4" required></textarea><p id="proposalNotice" class="account-copy" hidden>Tiks iesniegtas arī nesaglabātās plāna izmaiņas.</p><p id="bulletinError" class="error" role="alert"></p><button id="sendBulletin" class="primary-button" type="submit">Iesniegt</button></form></dialog>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script>if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));</script>
+</body></html>

@@ -1,49 +1,50 @@
 # Dayline
 
-A minimalist, mobile-first daily timeline planner. Plain HTML/CSS/JavaScript with no build step. GitHub Pages serves the front end; Supabase provides email magic-link authentication and private cloud-synced plans.
+Latvisks mobilais plānotājs ar nedēļas laika joslu, V1–V4 prioritātēm, organizācijām un privātām biļeteņu sarakstēm. HTML, CSS un JavaScript; nav būvēšanas soļa.
 
-## Features
+## Ieslēgšana
 
-- Daily timeline with overlapping plans in side-by-side columns and a current-time marker
-- Week navigation, Today button, and an upcoming view
-- Create, edit, complete, and delete plans with categories and notes
-- Local browser storage when signed out or unconfigured
-- Supabase cloud sync for signed-in users, protected by row-level security
-- Mobile layout and a web app manifest
+1. Supabase SQL Editorā palaid visu `collaboration.sql`. Tas ietver arī sākotnējo shēmu un saglabā jau esošos plānus. `schema.sql` satur to pašu aktuālo iestatīšanas kodu; pietiek palaist vienu no abiem failiem. Iepriekšējais `timeline-migration.sql` vairs nav vajadzīgs.
+2. Esošo `config.js` saglabā. Tajā vajadzīga tikai Supabase projekta URL un publishable/anon atslēga. Nekad neievieto `service_role`, secret key vai datubāzes paroli.
+3. Supabase Authentication → URL Configuration: Site URL un Redirect URLs jāietver precīza adrese `https://renarsmb.github.io/Siphon/`.
+4. GitHub Pages publicē `master` zara sakni. Pēc atjauninājuma pārlādē lapu. Konti izmanto e-pastu un paroli; ja ieslēgta e-pasta apstiprināšana, vispirms apstiprini savu adresi.
+5. Iestatījumos saglabā savu vārdu un pēc izvēles profila bildes HTTPS adresi. Izveido organizāciju. Darba telpas izvēlnē augšā vari pārslēgt personīgos un organizācijas plānus.
+6. Organizācijas administrators Iestatījumos izveido vienreizēju uzaicinājuma kodu ar vajadzīgo lomu. Pats nodod kodu saņēmējam; automātiski e-pasti netiek sūtīti. Saņēmējs pieslēdzas un ievada kodu Iestatījumos. Kods derīgs 7 dienas un izmantojams vienreiz; to var atsaukt.
 
-## GitHub Pages: renarsmb/Siphon
+## Laika josla
 
-The app is at the root of the `master` branch. There is no build command, package install, or environment-variable injection. All asset and manifest paths are relative so they work under `/Siphon/`. `.nojekyll` disables Jekyll processing.
+- V1 ir augstākā prioritāte, V4 — zemākā. Krāsu, sākumu, beigas, dalībnieku nosaukumus, statusu un svarīguma atzīmi var mainīt plāna formā.
+- Datorā velc bloku. Telefonā turi aptuveni 350 ms un velc. Sānu malas maina sākumu/beigas; laika solis ir 30 minūtes. Tos pašus laukus var mainīt arī formā.
+- Pēc pārvietošanas izvēlies: paturēt esošo laiku, tuvāko brīvo laiku vai citu laiku. Brīvais laiks tiek meklēts izvēlētās nedēļas robežās tajā pašā prioritātes joslā, saglabājot ilgumu. Pabeigtie un atliktie plāni neaizņem brīvā laika meklētāju.
+- Ghost bloks ir nesaglabāts priekšskatījums. Tikai **Saglabāt** maina datus. **Atcelt** atjauno iepriekšējo versiju.
+- Organizācijas plāna formā izvēlēti dalībnieki piešķir viesiem piekļuvi. Atsevišķais dalībnieku nosaukumu lauks ir apraksta teksts un pats par sevi nemaina piekļuvi.
+- Rediģēšanas kontūra, sinhronizācijas simbols un profils tiek atjaunoti aptuveni ik pēc 5 sekundēm. Pārtraukta sesija izdziest 30 sekundēs. Tas ir informatīvs statuss, nevis ekskluzīvs bloķējums.
+- Vienlaicīgas saglabāšanas un veca apstiprinājuma gadījumā datubāze pārbauda versiju un noraida pārrakstīšanu.
 
-1. Open [Settings → Pages](https://github.com/renarsmb/Siphon/settings/pages).
-2. Choose **Deploy from a branch**, select **master** and **/(root)**, and save.
-3. When GitHub reports a successful deployment, open **https://renarsmb.github.io/Siphon/**.
+## Piekļuves
 
-This repository is private. GitHub Pages for private repositories requires a plan that supports it; preparation of these files does not enable Pages or change repository visibility. See [GitHub's publishing-source documentation](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site).
+| Loma | Plāni | Organizācijas pārvaldība |
+| --- | --- | --- |
+| Administrators | Redz un rediģē organizācijas plānus; saņem un izlemj sev adresētas biļetenes | Uzaicinājumi, lomas un dalībnieku noņemšana |
+| Piederīgais | Redz organizācijas plānus; veido un rediģē savus; var iesniegt izmaiņas apstiprināšanai | Nav |
+| Viesis | Redz tikai viņam piešķirtos plānus; var iesniegt izmaiņu pieprasījumu | Nav |
 
-## Supabase setup
+Īpašnieks ir administrators; viņa lomu un dalību no šīs saskarnes nevar noņemt. Personīgie plāni paliek privāti arī pēc organizācijas izveides. Organizācijas sarakstes redz tikai konkrētais iesniedzējs un saņēmējs, kamēr viņi ir dalībnieki. Citi administratori šīs sarakstes neredz.
 
-1. Create a Supabase project and run `schema.sql` in its SQL Editor. It creates the plans table, index, update trigger, and per-user select/insert/update/delete policies. The script can be rerun; it recreates only Dayline's named policies and trigger inside a transaction.
-2. Under **Authentication → URL Configuration**, set **Site URL** to `https://renarsmb.github.io/Siphon/` and add that exact URL under **Redirect URLs**. Enable Email authentication. Use the actual Pages address instead if you later configure a custom domain.
-3. Edit `config.js` with the project URL and **publishable** key, then commit the change. The legacy `anon` key is also supported. These values are public browser configuration, not secrets. A `.env` file or GitHub Actions secret is not automatically read by this static app.
-4. Open **Account** and request a sign-in link. Open it in the browser/device you want to use. Newly created cloud plans sync to that account; existing local plans stay on that browser and are not automatically migrated. There is currently no import/export interface.
-5. Verify with two accounts that each sees only its own plans before relying on cloud storage.
+## Biļetenes
 
-Never add a Supabase secret key, `service_role` key, database password, access token, or private key to `config.js`, source files, or GitHub Pages. Secret/service-role keys bypass row-level security. Keep RLS enabled. See [Supabase API keys](https://supabase.com/docs/guides/getting-started/api-keys) and [row-level security](https://supabase.com/docs/guides/database/postgres/row-level-security).
+Organizācijā atver **Biļetenes → Jauna**, izvēlies administratoru, pēc izvēles piesaisti plānu un iesniedz aprakstu. Lai iesniegtu konkrētas plāna izmaiņas, tās sagatavo plāna formā un spied **Iesniegt apstiprināšanai**. Pēc apstiprināšanas tās piemērojas plānam vienā datubāzes transakcijā; noraidīšana plānu nemaina.
 
-`config.js` intentionally ships with empty values, so the app works in local mode until configured. No Supabase project or credentials are provisioned by this repository.
+Sarakstē var pievienot līdz 5 PDF, DOCX, PNG, JPG vai TXT failiem, katru līdz 10 MB. Tie glabājas privātā Supabase Storage bucket. Lejupielādes saites ir īslaicīgas. Ziņas un faili netiek glabāti servisa darbinieka kešā.
 
-## Local preview
+## Vietējais un bezsaistes režīms
 
-Run `python3 -m http.server 8000` from the repository root and visit `http://localhost:8000/`. For local magic-link testing, add that URL to Supabase's redirect allowlist as well. Do not open the app using a `file://` URL.
+Bez pieslēgšanās personīgie plāni glabājas šajā pārlūkā. Vietējie plāni netiek automātiski importēti kontā; pēc izrakstīšanās tie atkal ir redzami. Mākoņa darbībām un organizāciju sarakstēm nepieciešams internets. Lietotnes faili, Google ikonu fonti un Supabase SDK tiek kešoti pēc pirmās veiksmīgās ielādes. Jauna pārlūka pirmā atvēršana prasa internetu.
 
-## Behavior and limits
+## Pārbaudes
 
-- Times are local wall-clock times and do not shift when traveling. Plans must start and end on the same date.
-- Cloud operations require connectivity. Local plans are stored in this browser only; clearing its storage removes them.
-- The Supabase SDK loads from a CDN. Local mode still starts if it is unavailable, but the app has no service worker or full offline-install support. The SDK URL follows version 2; pin and self-host a tested version if deterministic/offline loading is required.
-- The manifest uses an SVG icon; installation support varies by browser.
-
-## Replacement and history
-
-Dayline replaces the previous Siphon project files in a normal commit on `master`. The previous tip remains its parent, preserving the repository and earlier history.
+- `node --check app.js` un `node --check sw.js` pārbauda sintaksi.
+- `node timeline.test.js` pārbauda datumus, DST, vairāku dienu diapazonus, brīvo laiku un datu nemainīšanu pirms saglabāšanas.
+- `tests/access.sql` ir transakcijā atcelta PostgreSQL integrācijas pārbaude atsevišķai testa sesijai pēc shēmas uzstādīšanas. Tā pārbauda administratora, piederīgā, viesa un nepiederīga konta piekļuvi, uzaicinājumus un apstiprināšanu. Tā šajā izstrādes vidē nav izpildīta, jo nav piekļuves PostgreSQL/Supabase administrēšanai.
+- Lokālajā pārlūkā pārbaudīta izveide, pārlāde, V1→V2 vilkšana, laika izvēle, ghost priekšskatījums, atcelšana un saglabāšana. Čata ziņas, lēmuma darbības un iestatījumu saskarne pārbaudīta izolētā atmiņas testā; tas neaizstāj dzīvas datubāzes RLS pārbaudi.
+- Pēc shēmas palaišanas pārbaudi ar diviem reāliem kontiem: uzaicināšanu, piešķirtu viesa piekļuvi, ziņu un faila nosūtīšanu, apstiprināšanu un profila rediģēšanas indikatoru.
