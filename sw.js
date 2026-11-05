@@ -1,4 +1,4 @@
-const CACHE='dayline-shell-v3-collaboration';
+const CACHE='dayline-shell-v4-responsive';
 const APP=['./','./index.html','./styles.css','./timeline.js','./app.js','./config.js','./manifest.webmanifest','./icon.svg'];
 const EXTERNAL=['fonts.googleapis.com','fonts.gstatic.com','cdn.jsdelivr.net'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(APP)).then(()=>self.skipWaiting())));

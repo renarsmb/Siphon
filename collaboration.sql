@@ -115,7 +115,13 @@ drop policy if exists "dayline delete plans" on public.plans;
 alter table public.plans enable row level security;
 revoke all on public.plans from anon;
 grant select,insert,update,delete on public.plans to authenticated;
-create policy "dayline read plans" on public.plans for select to authenticated using(dayline_private.read_plan(id));
+create policy "dayline read plans" on public.plans for select to authenticated using(
+ (organization_id is null and user_id=(select auth.uid())) or
+ dayline_private.org_role(organization_id) in ('admin','member') or
+ (dayline_private.org_role(organization_id)='guest' and exists(
+   select 1 from public.plan_assignees a where a.plan_id=plans.id and a.user_id=(select auth.uid())
+ ))
+);
 create policy "dayline create plans" on public.plans for insert to authenticated with check(user_id=(select auth.uid()) and (organization_id is null or dayline_private.org_role(organization_id) in ('admin','member')));
 create policy "dayline edit plans" on public.plans for update to authenticated using(dayline_private.edit_plan(id)) with check(dayline_private.edit_plan(id));
 create policy "dayline delete plans" on public.plans for delete to authenticated using(dayline_private.edit_plan(id));

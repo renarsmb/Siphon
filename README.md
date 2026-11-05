@@ -2,6 +2,10 @@
 
 Latvisks mobilais plānotājs ar nedēļas laika joslu, V1–V4 prioritātēm, organizācijām un privātām biļeteņu sarakstēm. HTML, CSS un JavaScript; nav būvēšanas soļa.
 
+## Ja plāna izveidi bloķē RLS
+
+Ja shēma jau uzstādīta, palaid tikai `fix-plan-insert.sql` Supabase SQL Editorā. Tas labo jaunā ieraksta redzamības pārbaudi un saglabā RLS ieslēgtu.
+
 ## Ieslēgšana
 
 1. Supabase SQL Editorā palaid visu `collaboration.sql`. Tas ietver arī sākotnējo shēmu un saglabā jau esošos plānus. `schema.sql` satur to pašu aktuālo iestatīšanas kodu; pietiek palaist vienu no abiem failiem. Iepriekšējais `timeline-migration.sql` vairs nav vajadzīgs.

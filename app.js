@@ -77,7 +77,7 @@
     b.setAttribute('aria-label',`${p.title}, V${priority}, ${p.plan_date} ${clock(p.start_time)} – ${p.end_date||p.plan_date} ${clock(p.end_time)}${ownDraft?', nesaglabātas izmaiņas':''}`);
     b.onclick=()=>{if(!b.dataset.dragged)openEdit(original.id);};attachDrag(b,p,lane);lane.append(b);
    }
-   row.style.minHeight=`${Math.max(1,tracks.length)*112+12}px`;wrap.append(row);
+   row.style.minHeight=`${Math.max(1,tracks.length)*112+12}px`;row.style.setProperty("--row-height",`${Math.max(1,tracks.length)*112+12}px`);wrap.append(row);
   }
  }
  function renderUpcoming(){
